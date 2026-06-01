@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Cpu, Server, Zap, DollarSign, Database, SlidersHorizontal, RotateCcw, Search, Layers, X, MapPin, FileText, Link as LinkIcon, ShieldCheck, Network, TrendingUp, AlertTriangle } from 'lucide-react';
 import { fetchMapData, fetchAnalyticsData, formatH100, formatPower, formatCost } from '../lib/dataUtils';
 import MapSection from '../components/MapSection';
@@ -67,8 +67,14 @@ export default function Home() {
     const totalPower = filteredData.reduce((acc, d) => acc + d.power, 0);
     const totalCost = filteredData.reduce((acc, d) => acc + d.cost, 0);
 
-    const owners = Array.from(new Set(analyticsData.map(d => d.ownerName).filter(o => o && o !== 'Unknown'))).sort();
-    const countries = Array.from(new Set(analyticsData.map(d => d.country).filter(c => c))).sort();
+    const owners = useMemo(() => 
+        Array.from(new Set(analyticsData.map(d => d.ownerName).filter(o => o && o !== 'Unknown'))).sort(),
+        [analyticsData]
+    );
+    const countries = useMemo(() => 
+        Array.from(new Set(analyticsData.map(d => d.country).filter(c => c))).sort(),
+        [analyticsData]
+    );
 
     return (
         <>
@@ -82,22 +88,49 @@ export default function Home() {
                         <div className="logo-area">
                             <div className="logo-icon"><Cpu size={24} /></div>
                             <div>
-                                <h1 style={{fontSize: '1.2rem', marginBottom: 0}}>Data Center Intelligence Dashboard</h1>
+                                <h1 style={{fontSize: '1.2rem', marginBottom: 0}}>AI Infrastructure Dashboard</h1>
                             </div>
                         </div>
                     </div>
                     <div className="header-right">
                         <span className="status-indicator">
                             <span className="pulse-dot"></span>
-                            <span>{loading ? 'Loading...' : `Synced: ${analyticsData.length} Analytics Rows`}</span>
+                            <span>{loading ? 'Loading...' : `Map Nodes: ${mapYear === '2025' ? mapData2025.length : mapData2026.length} (Source 1)`}</span>
                         </span>
                     </div>
                 </header>
+
+                <section className="glass-panel" style={{ margin: '0 20px 20px 20px', padding: '15px' }}>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: '500', color: 'var(--text-bright)' }}>
+                        Data source 1, a general look at expansion over the past year (geography/physical footprint).
+                    </p>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
+                        <p style={{ marginBottom: '5px' }}>
+                            Mongird, K., Vernon, C., Burleyson, C., Akdemir, K. Z., & Rice, J. (2026). IM3 Open Source Data Center Atlas (v2026.02.09) [Data set]. MSD-LIVE Data Repository. 
+                            <a href="https://doi.org/10.57931/3017294" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-cyan)', marginLeft: '5px' }}>https://doi.org/10.57931/3017294</a>
+                        </p>
+                        <p>
+                            Project Repository: <a href="https://data.msdlive.org/records/p147s-4h760" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-cyan)' }}>https://data.msdlive.org/records/p147s-4h760</a>
+                        </p>
+                    </div>
+                </section>
 
                 <MapSection data={mapYear === '2025' ? mapData2025 : mapData2026} onNodeClick={setSelectedNode} mapYear={mapYear} setMapYear={setMapYear} />
                 
                 <MapDiffSection data2025={mapData2025} data2026={mapData2026} />
                 
+                <section className="glass-panel" style={{ margin: '40px 20px 20px 20px', padding: '15px' }}>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: '500', color: 'var(--text-bright)' }}>
+                        Data source 2, projected growth scenarios for future data center sites.
+                    </p>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
+                        <p style={{ marginBottom: '5px' }}>
+                            Mongird, K., Burleyson, C., Akdemir, K. Z., Thurber, T., Vernon, C., & Rice, J. (2025). IM3 Projected US Data Center Locations (Version v1) [Data set]. MSD-LIVE Data Repository. 
+                            <a href="https://doi.org/10.57931/2571680" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-cyan)', marginLeft: '5px' }}>https://doi.org/10.57931/2571680</a>
+                        </p>
+                    </div>
+                </section>
+
                 <ProjectedMapSection />
 
                 <section className="source-citations glass-panel" style={{ marginTop: '40px', marginBottom: '20px' }}>
@@ -233,6 +266,8 @@ export default function Home() {
                         </div>
                     </section>
                 </main>
+
+
             </div>
 
             {selectedNode && (

@@ -1,4 +1,6 @@
 import Papa from 'papaparse';
+import * as d3 from 'd3';
+import * as topojson from 'topojson-client';
 
 export function parseTagWithConfidence(val) {
     if (!val || val.trim() === "") return { name: 'Unknown', confidence: '' };
@@ -37,9 +39,14 @@ export async function fetchMapData(year = '2026') {
         ? '/data/im3_open_source_data_center_atlas.csv'
         : '/data/im3_open_source_data_center_atlas_v2026.02.09.csv';
         
-    const response = await fetch(filename);
-    const csvText = await response.text();
-    
+    const [csvResponse, countyTopology] = await Promise.all([
+        fetch(filename),
+        d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json")
+    ]);
+
+    const csvText = await csvResponse.text();
+    const counties = topojson.feature(countyTopology, countyTopology.objects.counties);
+
     return new Promise((resolve) => {
         Papa.parse(csvText, {
             header: true,
@@ -50,6 +57,17 @@ export async function fetchMapData(year = '2026') {
                     const lat = parseFloat(d.lat) || 0;
                     const lng = parseFloat(d.lon) || 0;
                     const ownerName = d.operator || d.name || 'Unknown';
+
+                    // Determine county_id based on lat/lng using d3.geoContains
+                    let facilityCountyId = d.county_id || '';
+                    if (lat !== 0 && lng !== 0) {
+                        for (const countyFeature of counties.features) {
+                            if (d3.geoContains(countyFeature, [lng, lat])) {
+                                facilityCountyId = countyFeature.id.toString().padStart(5, '0');
+                                break;
+                            }
+                        }
+                    }
 
                     return {
                         id: d.id || `dc-${index}`,
@@ -64,6 +82,7 @@ export async function fetchMapData(year = '2026') {
                         country: 'United States',
                         state: d.state || '',
                         county: d.county || '',
+                        county_id: facilityCountyId,
                         address: '',
                         lat,
                         lng
