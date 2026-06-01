@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+build/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
