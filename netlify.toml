@@ -1,0 +1,6 @@
+[build]
+  # Tell Netlify to change to the "visualizer" directory before building
+  base = "visualizer"
+
+  # The build command, which will now be run from inside "visualizer"
+  command = "npm run build"
