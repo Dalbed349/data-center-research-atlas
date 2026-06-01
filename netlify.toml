@@ -4,3 +4,7 @@
 
   # The build command, which will now be run from inside "visualizer"
   command = "npm run build"
+  
+  # The directory to publish, which is ".next" for a Next.js app.
+  # This overrides the incorrect "dist" setting from the Netlify UI.
+  publish = ".next"
