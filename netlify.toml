@@ -3,9 +3,11 @@
   command = "npm run build"
   publish = "out"
 
-# This rule is essential for single-page applications.
-# It tells Netlify to serve the index.html file for any path that doesn't match an existing file.
-# This allows the Next.js router to handle all page navigation on the client-side.
+[build.processing]
+  skip_processing = false
+[build.processing.html]
+  pretty_urls = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
